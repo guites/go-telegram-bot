@@ -21,3 +21,11 @@ http://www.golangpatterns.info/web/long-poll-server
 https://github.com/jcuga/golongpoll
 
 https://en.wikipedia.org/wiki/Push_technology#Long_polling
+
+Sqlite3 with golang
+
+https://www.allhandsontech.com/programming/golang/how-to-use-sqlite-with-go/
+
+https://github.com/mattn/go-sqlite3
+
+https://earthly.dev/blog/golang-sqlite/
