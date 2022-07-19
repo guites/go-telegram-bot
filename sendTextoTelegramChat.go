@@ -5,15 +5,11 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 )
 
 // sendTextToTelegramChat sends a text message to the Telegram chat identified by its chat Id
 func sendTextToTelegramChat(chatId int, text string) (string, error) {
-
-	// TODO: read TELEGRAM_BOT_TOKEN from .env file
-	var telegram_bot_token string = os.Getenv("TELEGRAM_BOT_TOKEN")
 	
 	log.Printf("Sending %s to chat_id: %d", text, chatId)
 	var telegramApi string = "https://api.telegram.org/bot" + telegram_bot_token + "/sendMessage"
