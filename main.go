@@ -3,11 +3,13 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 )
 
-// longPollingHandler starts the request to the telegram API and executes the callback if the request finishes with updates
+var envVars EnvHolder = loadEnv()
+var telegram_bot_token string = envVars.getVar("TELEGRAM_BOT_TOKEN")
+
+// longPollingHandler starts the request to the telegram API returns the reponse
 func longPollingHandler(timeout int, offset int, telegram_bot_token string) (response *http.Response) {
 
 	// starts the polling request
@@ -33,11 +35,6 @@ func longPollingHandler(timeout int, offset int, telegram_bot_token string) (res
 
 
 func main() {
-	// TODO: read TELEGRAM_BOT_TOKEN from .env file
-	var telegram_bot_token string = os.Getenv("TELEGRAM_BOT_TOKEN")
-	if telegram_bot_token == "" {
-		log.Fatal("Undefined TELEGRAM_BOT_TOKEN environment variable.")
-	}
 
 	db_err := createUpdatesTable()
 	if db_err != nil {
