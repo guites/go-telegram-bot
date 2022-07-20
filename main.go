@@ -5,7 +5,9 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
+
 
 var envVars EnvHolder = loadEnv()
 var telegram_bot_token string = envVars.getVar("TELEGRAM_BOT_TOKEN")
@@ -34,62 +36,61 @@ func longPollingHandler(timeout int, offset int, telegram_bot_token string) (res
 
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	db_err := createUpdatesTable()
 	if db_err != nil {
 		log.Fatalf("Could not start sqlite3 database: %s", db_err.Error())
 	}
 
-	// open database connection
-	db, db_err := sql.Open("sqlite3", "./updates.db")
-	if db_err != nil {
-		log.Fatal(db_err)
-	}
-	defer db.Close()
-
-	// get latest UpdateId from database
-	latestUpdate, update_err := getLatestUpdateFromDatabase(db)
-	
-	var latestOffset int
-	if update_err != nil {
-		latestOffset = 0
-	} else {
-		latestOffset = latestUpdate.UpdateId + 1
-	}
-	var response = longPollingHandler(60, latestOffset, telegram_bot_token)
-
-	// parse incoming request
-	var receivedPayload, err = parseTelegramResponse(response)
-
-	if err != nil {
-		log.Printf("error parsing the telegram response, %s", err.Error())
-		return
-	}
-
-	printParsedResponse(receivedPayload)
-
-	// // TODO: add response logic
-	// var responseText string
-
-	// // for each received message, save the UpdateId to the database and send a reply
-	for i, s := range receivedPayload.Result {
-		newUpdate := DatabaseUpdate{
-			UpdateId: s.UpdateId,
-			Text: s.Message.Text,
-			ChatId: s.Message.Chat.Id,
-			FromId: s.Message.From.Id,
-			First_Name: s.Message.From.First_Name,
-			Last_Name: s.Message.From.Last_Name,
+	for {
+		db, db_err := sql.Open("sqlite3", "./updates.db")
+		if db_err != nil {
+			log.Println(db_err)
+			time.Sleep(3 * time.Second)
 		}
-		addUpdateToDatabase(db, newUpdate)
-		log.Printf("message %d saved to db", i)
-		// responseText = s.Message.Text + " ~beep"
-		// var telegramResponseBody, errTelegram = sendTextToTelegramChat(s.Message.Chat.Id, responseText)
-		// if errTelegram != nil {
-		// 	log.Printf("Got error %s from telegram on message %d, response body is %s", errTelegram.Error(), i, telegramResponseBody)
-		// } else {
-		// 	log.Printf("message %s successfuly distributed to chat id %d", responseText, s.Message.Chat.Id)
-		// }
-	}
+		// get latest UpdateId from database
+		latestUpdate, update_err := getLatestUpdateFromDatabase(db)
+		
+		var latestOffset int
+		if update_err != nil {
+			log.Println(update_err)
+			latestOffset = 0
+		} else {
+			latestOffset = latestUpdate.UpdateId + 1
+		}
+		var response = longPollingHandler(60, latestOffset, telegram_bot_token)
 
+		// parse incoming request
+		var receivedPayload, err = parseTelegramResponse(response)
+
+		if err != nil {
+			log.Printf("error parsing the telegram response, %s", err.Error())
+		}
+
+		printParsedResponse(receivedPayload)
+
+		// // for each received message, save the UpdateId to the database and send a reply
+		for i, s := range receivedPayload.Result {
+			newUpdate := DatabaseUpdate{
+				UpdateId: s.UpdateId,
+				Text: s.Message.Text,
+				ChatId: s.Message.Chat.Id,
+				FromId: s.Message.From.Id,
+				First_Name: s.Message.From.First_Name,
+				Last_Name: s.Message.From.Last_Name,
+			}
+			addUpdateToDatabase(db, newUpdate)
+			log.Printf("message #%d (%d) saved to db", i, s.UpdateId)
+		}
+		db.Close()
+	}
 }
+
+// responseText = s.Message.Text + " ~beep"
+// var telegramResponseBody, errTelegram = sendTextToTelegramChat(s.Message.Chat.Id, responseText)
+// if errTelegram != nil {
+// 	log.Printf("Got error %s from telegram on message %d, response body is %s", errTelegram.Error(), i, telegramResponseBody)
+// } else {
+// 	log.Printf("message %s successfuly distributed to chat id %d", responseText, s.Message.Chat.Id)
+// }
