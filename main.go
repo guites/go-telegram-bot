@@ -48,9 +48,15 @@ func main() {
 	defer db.Close()
 
 	// get latest UpdateId from database
-	latestUpdate := getLatestUpdateFromDatabase(db)
-	lastestOffset := latestUpdate.UpdateId + 1
-	var response = longPollingHandler(60, lastestOffset, telegram_bot_token)
+	latestUpdate, update_err := getLatestUpdateFromDatabase(db)
+	
+	var latestOffset int
+	if update_err != nil {
+		latestOffset = 0
+	} else {
+		latestOffset = latestUpdate.UpdateId + 1
+	}
+	var response = longPollingHandler(60, latestOffset, telegram_bot_token)
 
 	// parse incoming request
 	var receivedPayload, err = parseTelegramResponse(response)
