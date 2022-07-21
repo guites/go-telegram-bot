@@ -68,9 +68,6 @@ func main() {
 			log.Printf("error parsing the telegram response, %s", err.Error())
 		}
 
-		printParsedResponse(receivedPayload)
-
-		// // for each received message, save the UpdateId to the database and send a reply
 		for i, s := range receivedPayload.Result {
 			newUpdate := DatabaseUpdate{
 				UpdateId: s.UpdateId,
@@ -79,6 +76,12 @@ func main() {
 				FromId: s.Message.From.Id,
 				First_Name: s.Message.From.First_Name,
 				Last_Name: s.Message.From.Last_Name,
+				
+			}
+			if len(s.Message.Entity) > 0 {
+				newUpdate.Type = s.Message.Entity[0].Type
+				newUpdate.Length = s.Message.Entity[0].Length
+				newUpdate.Offset = s.Message.Entity[0].Offset
 			}
 			addUpdateToDatabase(db, newUpdate)
 			log.Printf("message #%d (%d) saved to db", i, s.UpdateId)

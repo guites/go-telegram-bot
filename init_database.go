@@ -3,14 +3,18 @@ package main
 import "database/sql"
 
 const create string = `
-  CREATE TABLE IF NOT EXISTS updates (
-  UpdateId INTEGER NOT NULL PRIMARY KEY,
-  Text TEXT NOT NULL,
-  ChatId INTEGER NOT NULL,
-  FromId INTEGER NOT NULL,
-  First_Name TEXT NOT NULL,
-  Last_Name TEXT
-);`
+	CREATE TABLE IF NOT EXISTS updates (
+		UpdateId INTEGER NOT NULL PRIMARY KEY,
+		Text TEXT NOT NULL,
+		ChatId INTEGER NOT NULL,
+		FromId INTEGER NOT NULL,
+		First_Name TEXT NOT NULL,
+		Last_Name TEXT,
+		Type TEXT,
+		Offset INTEGER,
+		Length INTEGER
+	);
+	`
 
 const file string = "updates.db"
 
