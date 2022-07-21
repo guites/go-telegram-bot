@@ -85,6 +85,8 @@ func main() {
 			}
 			addUpdateToDatabase(db, newUpdate)
 			log.Printf("message #%d (%d) saved to db", i, s.UpdateId)
+			handleRespondingLogic(newUpdate)
+
 		}
 		db.Close()
 	}
