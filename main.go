@@ -2,8 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 )
@@ -34,15 +36,7 @@ func longPollingHandler(timeout int, offset int, telegram_bot_token string) (res
 
 }
 
-
-func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-
-	db_err := createUpdatesTable()
-	if db_err != nil {
-		log.Fatalf("Could not start sqlite3 database: %s", db_err.Error())
-	}
-
+func runBot() {
 	for {
 		db, db_err := sql.Open("sqlite3", "./updates.db")
 		if db_err != nil {
@@ -85,10 +79,57 @@ func main() {
 			}
 			addUpdateToDatabase(db, newUpdate)
 			log.Printf("message #%d (%d) saved to db", i, s.UpdateId)
-			handleRespondingLogic(newUpdate)
+			handleRespondingLogic(db, newUpdate)
 
 		}
 		db.Close()
+	}
+}
+
+func addComands() {
+	var name string
+	var callback string
+
+	db, db_err := sql.Open("sqlite3", "./updates.db")
+	if db_err != nil {
+		log.Println(db_err)
+		time.Sleep(3 * time.Second)
+	}
+
+	// TODO: validate for empty input, min length, command starts with slash etc
+	fmt.Print("Insert command name: ")
+	fmt.Scanf("%s", &name)
+	fmt.Println("Command name is", name)
+
+	fmt.Print("Insert command callback function: ")
+	fmt.Scanf("%s", &callback)
+	fmt.Println("Callback function name:", callback)
+
+	newCommand := DatabaseCommand{
+		Name: name,
+		Callback: callback,
+	}
+
+	addCommandToDatabase(db, newCommand)
+}
+
+func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	db_err := createTables()
+	if db_err != nil {
+		log.Fatalf("Could not start sqlite3 database: %s", db_err.Error())
+	}
+
+	cmdArgs := os.Args[1:]
+	chosenOption := cmdArgs[0]
+	switch chosenOption {
+	case "bot":
+		runBot()
+	case "add_commands":
+		addComands()
+	default:
+		fmt.Println("Available options: [bot|add_commands]")
 	}
 }
 

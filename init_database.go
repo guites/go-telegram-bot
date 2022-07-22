@@ -14,11 +14,16 @@ const create string = `
 		Offset INTEGER,
 		Length INTEGER
 	);
+	CREATE TABLE IF NOT EXISTS commands (
+		Id INTEGER NOT NULL PRIMARY KEY,
+		Name TEXT NOT NULL,
+		Callback TEXT NOT NULL
+	)
 	`
 
 const file string = "updates.db"
 
-func createUpdatesTable() (error) {
+func createTables() (error) {
 	db, err := sql.Open("sqlite3", file)
 	if err != nil {
 		return err
