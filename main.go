@@ -36,6 +36,25 @@ func longPollingHandler(timeout int, offset int, telegram_bot_token string) (res
 
 }
 
+func testLOL() {
+	db, db_err := sql.Open("sqlite3", "./updates.db")
+	if db_err != nil {
+		log.Fatal(db_err)
+	}
+	newUpdate := DatabaseUpdate{
+		UpdateId: 123123,
+		Text: "/lembrete where tf this going",
+		ChatId: 213123,
+		FromId: 44,
+		First_Name: "guites",
+		Last_Name: "hackerman millionaire",
+		Type: "bot_command",
+		Length: 9,
+		Offset: 0,
+	}
+	handleRespondingLogic(db, newUpdate)
+}
+
 func runBot() {
 	for {
 		db, db_err := sql.Open("sqlite3", "./updates.db")
@@ -122,12 +141,17 @@ func main() {
 	}
 
 	cmdArgs := os.Args[1:]
+	if len(cmdArgs) < 1 {
+		log.Fatal("Available options: [bot|add_commands]")
+	}
 	chosenOption := cmdArgs[0]
 	switch chosenOption {
 	case "bot":
 		runBot()
 	case "add_commands":
 		addComands()
+	case "test":
+		testLOL()
 	default:
 		fmt.Println("Available options: [bot|add_commands]")
 	}

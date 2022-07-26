@@ -2,7 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+
+	"dynamicaller"
 )
 
 func getCommandsFromDb(db *sql.DB) ([]DatabaseCommand){
@@ -30,14 +33,21 @@ func getCommandsFromDb(db *sql.DB) ([]DatabaseCommand){
 func handleRespondingLogic(db *sql.DB, newUpdate DatabaseUpdate) {
 
 	registeredCommands := getCommandsFromDb(db)
-	log.Print(registeredCommands)
+
 	if newUpdate.Type == "bot_command" {
 		command_name := newUpdate.Text[newUpdate.Offset:newUpdate.Length]
-		switch command_name {
-		case "/lembrete":
-			log.Print("Lembrete!")
-		default:
-			log.Print("Comando não encontrado!")
+		log.Print("Received command:", command_name)
+		for i := range registeredCommands {
+			if registeredCommands[i].Name == command_name {
+				log.Print("Running command ", command_name)
+				dynamicaller := new(dynamicaller.Dynamicaller)
+				args := newUpdate.Text[newUpdate.Length:]
+				res := dynamicaller.DynamicCall(dynamicaller, registeredCommands[i].Callback, args)
+				if err, ok := res[2].Interface().(error); ok && err != nil {
+					fmt.Println(err)
+				}
+				break
+			}
 		}
 	}
 }
