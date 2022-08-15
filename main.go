@@ -132,6 +132,29 @@ func addComands() {
 	addCommandToDatabase(db, newCommand)
 }
 
+func showCommands() {
+	db, db_err := sql.Open("sqlite3", "./updates.db")
+	if db_err != nil {
+		log.Fatal(db_err)
+	}
+	rows, err := db.Query("SELECT * FROM commands;")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	fmt.Println("Currently registered commands: ")
+	for rows.Next() {
+		var Id int
+        var Name string
+        var Callback string
+		err = rows.Scan(&Id, &Name, &Callback)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("%d %s %s\n", Id, Name, Callback)
+	}
+}
+
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
@@ -142,7 +165,7 @@ func main() {
 
 	cmdArgs := os.Args[1:]
 	if len(cmdArgs) < 1 {
-		log.Fatal("Available options: [bot|add_commands]")
+		log.Fatal("Available options: [bot|add_commands|show_commands]")
 	}
 	chosenOption := cmdArgs[0]
 	switch chosenOption {
@@ -150,10 +173,12 @@ func main() {
 		runBot()
 	case "add_commands":
 		addComands()
+	case "show_commands":
+		showCommands()
 	case "test":
 		testLOL()
 	default:
-		fmt.Println("Available options: [bot|add_commands]")
+		fmt.Println("Available options: [bot|add_commands|show_commands]")
 	}
 }
 
