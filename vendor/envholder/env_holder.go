@@ -1,4 +1,4 @@
-package main
+package envholder
 
 import (
 	"bufio"
@@ -19,7 +19,7 @@ type EnvVar struct {
 }
 
 // Returns the value for a given variable loaded from .env file by name
-func (x EnvHolder) getVar(var_name string) (string){
+func (x EnvHolder) GetVar(var_name string) (string){
 	for _, envVariable := range(x.vars) {
 		if envVariable.name == var_name {
 			return envVariable.val
@@ -30,7 +30,7 @@ func (x EnvHolder) getVar(var_name string) (string){
 }
 
 // loadEnv reads from the .env file and acts as a factory method for the EnvHolder struct
-func loadEnv() (EnvHolder){
+func LoadEnv() (EnvHolder){
 	file, ferr := os.Open(".env")
 	if ferr != nil {
 		log.Fatalf("Could not find .env file, details: %s", ferr.Error())
