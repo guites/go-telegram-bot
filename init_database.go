@@ -18,7 +18,8 @@ const create string = `
 		Id INTEGER NOT NULL PRIMARY KEY,
 		Name TEXT NOT NULL,
 		Callback TEXT NOT NULL
-	)
+	);
+	INSERT INTO commands (Name, Callback) VALUES ("/echo", "EchoHandlerFunc");
 	`
 
 const file string = "updates.db"

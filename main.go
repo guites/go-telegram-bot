@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"envholder"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,8 +12,8 @@ import (
 )
 
 
-var envVars EnvHolder = loadEnv()
-var telegram_bot_token string = envVars.getVar("TELEGRAM_BOT_TOKEN")
+var envVars envholder.EnvHolder = envholder.LoadEnv()
+var telegram_bot_token string = envVars.GetVar("TELEGRAM_BOT_TOKEN")
 
 // longPollingHandler starts the request to the telegram API returns the reponse
 func longPollingHandler(timeout int, offset int, telegram_bot_token string) (response *http.Response) {

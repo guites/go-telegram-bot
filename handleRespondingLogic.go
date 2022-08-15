@@ -42,7 +42,7 @@ func handleRespondingLogic(db *sql.DB, newUpdate DatabaseUpdate) {
 				log.Print("Running command ", command_name)
 				dynamicaller := new(dynamicaller.Dynamicaller)
 				args := newUpdate.Text[newUpdate.Length:]
-				res := dynamicaller.DynamicCall(dynamicaller, registeredCommands[i].Callback, args)
+				res := dynamicaller.DynamicCall(dynamicaller, registeredCommands[i].Callback, args, newUpdate.ChatId)
 				if err, ok := res[2].Interface().(error); ok && err != nil {
 					fmt.Println(err)
 				}
